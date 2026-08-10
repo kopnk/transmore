@@ -1,0 +1,20 @@
+{
+    "name": "transmore/backend",
+    "description": "Backend API for TransMore",
+    "require": {
+        "ext-pdo": "*",
+        "ext-sodium": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "TransMore\\Backend\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "transmore"
+        }
+    ],
+    "minimum-stability": "stable"
+}

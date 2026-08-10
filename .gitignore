@@ -1,0 +1,9 @@
+node_modules
+backend/vendor
+backend/storage/*.key
+.nuxt
+.output
+dist
+.data
+.env
+*.log

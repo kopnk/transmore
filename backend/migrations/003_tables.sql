@@ -1,0 +1,89 @@
+ALTER TABLE users
+  ADD COLUMN iduser VARCHAR(64) NOT NULL UNIQUE AFTER id,
+  ADD COLUMN handphone VARCHAR(50) NOT NULL DEFAULT '' AFTER name,
+  ADD COLUMN alamat VARCHAR(255) NOT NULL DEFAULT '' AFTER handphone,
+  ADD COLUMN created_by VARCHAR(255) NOT NULL DEFAULT 'system' AFTER must_change_password,
+  ADD COLUMN updated_by VARCHAR(255) NULL AFTER created_by;
+
+CREATE TABLE IF NOT EXISTS kendaraan (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  idkendaraan VARCHAR(64) NOT NULL UNIQUE,
+  namaPemilik VARCHAR(255) NOT NULL,
+  tnkb VARCHAR(64) NOT NULL,
+  tahun INT NOT NULL,
+  handphone VARCHAR(50) NOT NULL,
+  bank VARCHAR(100) NOT NULL,
+  rekening VARCHAR(100) NOT NULL,
+  alamat VARCHAR(255) NOT NULL,
+  status ENUM('Aktif','Nonaktif') NOT NULL DEFAULT 'Aktif',
+  created_by VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_by VARCHAR(255) NULL,
+  updated_at DATETIME NULL
+);
+
+CREATE TABLE IF NOT EXISTS pks (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  idpks VARCHAR(64) NOT NULL UNIQUE,
+  nama VARCHAR(255) NOT NULL,
+  pic VARCHAR(255) NOT NULL,
+  handphone VARCHAR(50) NOT NULL,
+  alamat VARCHAR(255) NOT NULL,
+  status ENUM('Aktif','Nonaktif') NOT NULL DEFAULT 'Aktif',
+  created_by VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_by VARCHAR(255) NULL,
+  updated_at DATETIME NULL
+);
+
+CREATE TABLE IF NOT EXISTS kebun (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  idkebun VARCHAR(64) NOT NULL UNIQUE,
+  nama VARCHAR(255) NOT NULL,
+  pic VARCHAR(255) NOT NULL,
+  handphone VARCHAR(50) NOT NULL,
+  alamat VARCHAR(255) NOT NULL,
+  status ENUM('Aktif','Nonaktif') NOT NULL DEFAULT 'Aktif',
+  created_by VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_by VARCHAR(255) NULL,
+  updated_at DATETIME NULL
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  idpengiriman VARCHAR(64) NOT NULL UNIQUE,
+  number VARCHAR(100) NOT NULL,
+  date DATETIME NOT NULL,
+  kebun VARCHAR(255) NOT NULL,
+  divisi VARCHAR(255) NOT NULL,
+  vehicle VARCHAR(255) NOT NULL,
+  odo_start INT NOT NULL,
+  odo_end INT NOT NULL,
+  driver VARCHAR(255) NOT NULL,
+  load_date DATETIME NOT NULL,
+  load_weight INT NOT NULL,
+  unload_date DATETIME NOT NULL,
+  unload_weight INT NOT NULL,
+  price DECIMAL(14,2) NOT NULL,
+  fee DECIMAL(14,2) NOT NULL,
+  receiver_pic VARCHAR(255) NOT NULL,
+  notes TEXT NULL,
+  approved TINYINT(1) NOT NULL DEFAULT 0,
+  pks VARCHAR(255) NULL,
+  status ENUM('Draft','Proses','Selesai') NOT NULL DEFAULT 'Draft',
+  created_by VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_by VARCHAR(255) NULL,
+  updated_at DATETIME NULL
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  module VARCHAR(255) NOT NULL,
+  action VARCHAR(255) NOT NULL,
+  detail TEXT NOT NULL,
+  actor VARCHAR(255) NOT NULL,
+  via VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL
+);
