@@ -123,6 +123,9 @@ try {
         case $resource === 'transactions' && $method === 'GET' && $resourceId === null:
             listTransactions();
             break;
+        case $path === '/transaction-options' && $method === 'GET':
+            listTransactionOptions();
+            break;
         case $path === '/transactions/sync' && $method === 'POST':
             syncTransaction($request);
             break;
@@ -726,6 +729,22 @@ function listTransactions(): void
         unset($row);
     }
     Response::json(['success' => true, 'data' => $rows]);
+}
+
+function listTransactionOptions(): void
+{
+    $user=authenticate(false);
+    $permissions=permissionsForUser((int)$user['id'],$user['permissions']??'{}');
+    if (($user['role']??'') !== 'superadmin' && empty($permissions['pengiriman']['read'])) {
+        Response::error('Forbidden',403);
+    }
+
+    $db=Database::connect();
+    Response::json(['success'=>true,'data'=>[
+        'kebun'=>$db->query("SELECT nama FROM kebun WHERE status='Aktif' ORDER BY nama")->fetchAll(PDO::FETCH_ASSOC),
+        'kendaraan'=>$db->query("SELECT tnkb,namaPemilik FROM kendaraan WHERE status='Aktif' ORDER BY tnkb")->fetchAll(PDO::FETCH_ASSOC),
+        'pks'=>$db->query("SELECT nama FROM pks WHERE status='Aktif' ORDER BY nama")->fetchAll(PDO::FETCH_ASSOC),
+    ]]);
 }
 
 function resetUserPassword(int $id): void

@@ -2,15 +2,15 @@
 import dayjs from'dayjs';
 import{toast}from'vue-sonner';
 import{z}from'zod';
-import type{Kendaraan,Transaction}from'~/types';
+import type{Kebun,Kendaraan,Pks,Transaction}from'~/types';
 const auth=useAuthStore();
 const route=useRoute();
 const{db,seed,audit,offlineDb}=useDatabase();
 const{sync,enqueue}=useTransactionSync();
-const kebuns=ref<any[]>([]);
-const pksList=ref<any[]>([]);
+const kebuns=ref<Pick<Kebun,'nama'>[]>([]);
+const pksList=ref<Pick<Pks,'nama'>[]>([]);
 const rows=ref<Transaction[]>([]);
-const vehicles=ref<Kendaraan[]>([]);
+const vehicles=ref<Pick<Kendaraan,'tnkb'|'namaPemilik'>[]>([]);
 const show=ref(false);
 const editing=ref<number|undefined>();
 const saving=ref(false);
@@ -62,9 +62,9 @@ const filters=reactive({
 });
 const receiverPics=computed(()=>[...new Set(rows.value.map(row=>row.receiverPic).filter(Boolean))]);
 const divisions=computed(()=>[...new Set(rows.value.map(row=>row.divisi).filter(Boolean))]);
-const kebunOptions=computed(()=>[...new Set([...kebuns.value.map(row=>row.nama),...rows.value.map(row=>row.kebun)].filter(Boolean))]);
-const vehicleOptions=computed(()=>[...new Set([...vehicles.value.map(row=>row.tnkb),...rows.value.map(row=>row.vehicle)].filter(Boolean))]);
-const pksOptions=computed(()=>[...new Set([...pksList.value.map(row=>row.nama),...rows.value.map(row=>row.pks)].filter(Boolean))]);
+const kebunOptions=computed(()=>[...new Set(kebuns.value.map(row=>row.nama).filter(Boolean))]);
+const vehicleOptions=computed(()=>[...new Set(vehicles.value.map(row=>row.tnkb).filter(Boolean))]);
+const pksOptions=computed(()=>[...new Set(pksList.value.map(row=>row.nama).filter(Boolean))]);
 const ownerFilterOptions=computed(()=>vehicles.value.map(row=>({label:row.namaPemilik,value:row.namaPemilik})));
 const driverFilterOptions=computed(()=>[...new Set(rows.value.map(row=>row.driver).filter(Boolean))].map(value=>({label:value,value})));
 const filteredRows=computed(()=>rows.value.filter(row=>{
@@ -84,8 +84,8 @@ async function load(){
   rows.value=await db.transactions.reverse().toArray();
   if(navigator.onLine)try{await sync();rows.value=await db.transactions.reverse().toArray()}catch{toast.error('Backend belum terhubung; data transaksi lokal tetap aman')}
   if(navigator.onLine)try{
-    const[vehicleRows,kebunRows,pksRows]=await Promise.all([db.kendaraan.toArray(),db.kebun.toArray(),db.pks.toArray()]);
-    vehicles.value=vehicleRows;kebuns.value=kebunRows;pksList.value=pksRows;
+    const response=await useApi().request<{kendaraan:Pick<Kendaraan,'tnkb'|'namaPemilik'>[];kebun:Pick<Kebun,'nama'>[];pks:Pick<Pks,'nama'>[]}>('/transaction-options');
+    vehicles.value=response.data?.kendaraan||[];kebuns.value=response.data?.kebun||[];pksList.value=response.data?.pks||[];
   }catch{toast.error('Master data belum dapat dimuat dari backend')}
 }
 function resetForm(){
@@ -331,8 +331,10 @@ watch(()=>route.query.new,(value,previous)=>{if(value&&value!==previous)openNew(
           </div>
           <div>
             <label class="label">Kebun *</label>
-            <input v-model="form.kebun" list="kebun-options" class="input" placeholder="Pilih atau ketik Kebun" required>
-            <datalist id="kebun-options"><option v-for="name in kebunOptions" :key="name" :value="name" /></datalist>
+            <select v-model="form.kebun" class="input" required>
+              <option value="" disabled>Pilih Kebun</option>
+              <option v-for="name in kebunOptions" :key="name" :value="name">{{name}}</option>
+            </select>
           </div>
           <div>
             <label class="label">Divisi *</label>
@@ -340,8 +342,10 @@ watch(()=>route.query.new,(value,previous)=>{if(value&&value!==previous)openNew(
           </div>
           <div>
             <label class="label">Kendaraan *</label>
-            <input v-model="form.vehicle" list="vehicle-options" class="input" placeholder="Pilih atau ketik TNKB" required>
-            <datalist id="vehicle-options"><option v-for="tnkb in vehicleOptions" :key="tnkb" :value="tnkb" /></datalist>
+            <select v-model="form.vehicle" class="input" required>
+              <option value="" disabled>Pilih Kendaraan</option>
+              <option v-for="tnkb in vehicleOptions" :key="tnkb" :value="tnkb">{{tnkb}}</option>
+            </select>
           </div>
           <div>
             <label class="label">Driver *</label>
@@ -373,8 +377,10 @@ watch(()=>route.query.new,(value,previous)=>{if(value&&value!==previous)openNew(
           </div>
           <div>
             <label class="label">PKS *</label>
-            <input v-model="form.pks" list="pks-options" class="input" placeholder="Pilih atau ketik PKS" required>
-            <datalist id="pks-options"><option v-for="name in pksOptions" :key="name" :value="name" /></datalist>
+            <select v-model="form.pks" class="input" required>
+              <option value="" disabled>Pilih PKS</option>
+              <option v-for="name in pksOptions" :key="name" :value="name">{{name}}</option>
+            </select>
           </div>
           <div v-if="canViewFinancial">
             <label class="label">Harga</label>
