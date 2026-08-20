@@ -15,9 +15,9 @@ onBeforeUnmount(()=>{removeEventListener('online',handleOnline);removeEventListe
 <template>
 <div v-if="route.path!=='/login'" class="min-h-screen lg:flex">
   <button v-if="open" type="button" class="fixed inset-0 z-50 bg-slate-950/50 lg:hidden" aria-label="Tutup menu" @click="open=false" />
-  <aside :class="[open?'translate-x-0':'-translate-x-full','fixed inset-y-0 left-0 z-[60] w-72 bg-slate-950 text-white transition lg:translate-x-0']">
+  <aside :class="[open?'translate-x-0':'-translate-x-full','fixed inset-y-0 left-0 z-[60] w-60 bg-slate-950 text-white transition lg:translate-x-0']">
     <div class="flex h-20 items-center gap-3 border-b border-white/10 px-6">
-      <div class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-ocean-500 to-brand-500 font-black">TM</div>
+      <img src="/icon.png" alt="Logo TransMore" class="h-11 w-11 rounded-xl object-contain">
       <div class="min-w-0">
         <div class="font-bold">TransMore</div>
         <div class="text-xs text-slate-400">Operations & Monitoring</div>
@@ -31,7 +31,7 @@ onBeforeUnmount(()=>{removeEventListener('online',handleOnline);removeEventListe
       </div>
     </div>
   </aside>
-  <main class="min-w-0 flex-1 pb-20 lg:ml-72 lg:pb-0">
+  <main class="min-w-0 flex-1 pb-20 lg:ml-60 lg:pb-0">
     <header class="sticky top-0 z-30 flex items-center justify-between gap-3 border-b bg-white/90 px-4 py-3 backdrop-blur sm:px-8">
       <div class="min-w-0">
         <p class="text-xs font-medium text-slate-400">TransMore</p>

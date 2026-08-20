@@ -29,9 +29,13 @@ async function submitOffline(){const result=identifierSchema.safeParse(identifie
 
 <template>
   <main class="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-br from-blue-800 via-blue-600 to-teal-700 px-4 py-14 sm:px-5 sm:py-16">
-    <div class="absolute left-5 top-4 font-bold text-white sm:left-10 sm:top-6">TransMore</div>
+    <div class="w-full max-w-md">
+      <div class="mb-5 text-center text-white">
+        <img src="/icon.png" alt="Logo TransMore" class="mx-auto h-20 w-20 rounded-2xl object-contain shadow-xl sm:h-24 sm:w-24">
+        <p class="mt-3 text-2xl font-bold tracking-wide">TransMore</p>
+      </div>
 
-    <form class="w-full max-w-md rounded-2xl border border-white/30 bg-white p-5 shadow-2xl sm:p-7" @submit.prevent="submit">
+      <form class="w-full rounded-2xl border border-white/30 bg-white p-5 shadow-2xl sm:p-7" @submit.prevent="submit">
       <div class="mb-5 sm:mb-6">
         <p class="text-xs font-bold uppercase tracking-wide text-brand-600">Selamat Datang</p>
         <h1 class="mt-1.5 text-2xl font-bold text-slate-900 sm:text-3xl">Masuk ke akun Anda</h1>
@@ -52,22 +56,9 @@ async function submitOffline(){const result=identifierSchema.safeParse(identifie
       <button class="btn-primary w-full" type="submit">Masuk</button>
       <button v-if="!online" class="btn-secondary mt-3 w-full" type="button" @click="submitOffline">Masuk Offline</button>
       <p v-if="!online" class="mt-3 text-center text-xs text-amber-600">Mode offline hanya mengizinkan operasional Pengiriman lokal.</p>
-    </form>
+      </form>
+    </div>
 
-    <p class="absolute bottom-6 left-6 text-xs text-blue-100 sm:bottom-8 sm:left-10">© 2026 TransMore Operations</p>
+    <p class="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs text-blue-100 sm:bottom-8">© 2026 TransMore Operations</p>
   </main>
 </template>
-
-<style scoped>
-main > p:last-child {
-  bottom: 1rem;
-  left: 1.25rem;
-}
-
-@media (min-width: 640px) {
-  main > p:last-child {
-    bottom: 1.5rem;
-    left: 2.5rem;
-  }
-}
-</style>

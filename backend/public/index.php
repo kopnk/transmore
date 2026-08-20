@@ -311,11 +311,11 @@ function importLegacyMasterData(Request $request): void
     $db = Database::connect();
     $db->beginTransaction();
     try {
-        $kendaraan = $db->prepare('INSERT INTO kendaraan (idkendaraan,namaPemilik,tnkb,tahun,handphone,bank,rekening,alamat,status,created_by,created_at,updated_by,updated_at) VALUES (:idkendaraan,:namaPemilik,:tnkb,:tahun,:handphone,:bank,:rekening,:alamat,:status,:created_by,:created_at,:updated_by,:updated_at) ON DUPLICATE KEY UPDATE namaPemilik=VALUES(namaPemilik),tnkb=VALUES(tnkb),tahun=VALUES(tahun),handphone=VALUES(handphone),bank=VALUES(bank),rekening=VALUES(rekening),alamat=VALUES(alamat),status=VALUES(status),updated_by=VALUES(updated_by),updated_at=VALUES(updated_at)');
+        $kendaraan = $db->prepare('INSERT INTO kendaraan (idkendaraan,no_dt,driver,namaPemilik,tnkb,tahun,handphone,bank,rekening,alamat,status,created_by,created_at,updated_by,updated_at) VALUES (:idkendaraan,:no_dt,:driver,:namaPemilik,:tnkb,:tahun,:handphone,:bank,:rekening,:alamat,:status,:created_by,:created_at,:updated_by,:updated_at) ON DUPLICATE KEY UPDATE no_dt=VALUES(no_dt),driver=VALUES(driver),namaPemilik=VALUES(namaPemilik),tnkb=VALUES(tnkb),tahun=VALUES(tahun),handphone=VALUES(handphone),bank=VALUES(bank),rekening=VALUES(rekening),alamat=VALUES(alamat),status=VALUES(status),updated_by=VALUES(updated_by),updated_at=VALUES(updated_at)');
         foreach ($body['kendaraan'] as $row) {
             $validator=(new Validator())->required('idkendaraan',$row['idkendaraan']??null)->uuid('idkendaraan',$row['idkendaraan']??null)->required('tnkb',$row['tnkb']??null)->required('namaPemilik',$row['namaPemilik']??null);
             if($validator->fails())throw new InvalidArgumentException('Data kendaraan legacy tidak valid.');
-            $kendaraan->execute([':idkendaraan'=>$row['idkendaraan'],':namaPemilik'=>$row['namaPemilik'],':tnkb'=>$row['tnkb'],':tahun'=>(int)($row['tahun']??date('Y')),':handphone'=>$row['handphone']??'',':bank'=>$row['bank']??'',':rekening'=>$row['rekening']??'',':alamat'=>$row['alamat']??'',':status'=>$row['status']??'Aktif',':created_by'=>$row['createdBy']??$user['email'],':created_at'=>$row['createdAt']??date('Y-m-d H:i:s'),':updated_by'=>$user['email'],':updated_at'=>$row['updatedAt']??date('Y-m-d H:i:s')]);
+            $kendaraan->execute([':idkendaraan'=>$row['idkendaraan'],':no_dt'=>$row['noDt']??'',':driver'=>$row['driver']??'',':namaPemilik'=>$row['namaPemilik'],':tnkb'=>$row['tnkb'],':tahun'=>(int)($row['tahun']??date('Y')),':handphone'=>$row['handphone']??'',':bank'=>$row['bank']??'',':rekening'=>$row['rekening']??'',':alamat'=>$row['alamat']??'',':status'=>$row['status']??'Aktif',':created_by'=>$row['createdBy']??$user['email'],':created_at'=>$row['createdAt']??date('Y-m-d H:i:s'),':updated_by'=>$user['email'],':updated_at'=>$row['updatedAt']??date('Y-m-d H:i:s')]);
         }
         $pks = $db->prepare('INSERT INTO pks (idpks,nama,pic,handphone,alamat,status,created_by,created_at,updated_by,updated_at) VALUES (:uuid,:nama,:pic,:handphone,:alamat,:status,:created_by,:created_at,:updated_by,:updated_at) ON DUPLICATE KEY UPDATE nama=VALUES(nama),pic=VALUES(pic),handphone=VALUES(handphone),alamat=VALUES(alamat),status=VALUES(status),updated_by=VALUES(updated_by),updated_at=VALUES(updated_at)');
         foreach ($body['pks'] as $row) {
@@ -474,6 +474,8 @@ function createKendaraan(Request $request): void
     $body = $request->body();
     $validator = new Validator();
     $validator->required('idkendaraan', $body['idkendaraan'] ?? null)
+              ->required('noDt', $body['noDt'] ?? null)
+              ->required('driver', $body['driver'] ?? null)
               ->required('namaPemilik', $body['namaPemilik'] ?? null)
               ->required('tnkb', $body['tnkb'] ?? null)
               ->required('tahun', $body['tahun'] ?? null)
@@ -490,9 +492,11 @@ function createKendaraan(Request $request): void
     }
 
     $db = Database::connect();
-    $stmt = $db->prepare('INSERT INTO kendaraan (idkendaraan, namaPemilik, tnkb, tahun, handphone, bank, rekening, alamat, status, created_by, created_at) VALUES (:idkendaraan, :namaPemilik, :tnkb, :tahun, :handphone, :bank, :rekening, :alamat, :status, :created_by, :created_at)');
+    $stmt = $db->prepare('INSERT INTO kendaraan (idkendaraan, no_dt, driver, namaPemilik, tnkb, tahun, handphone, bank, rekening, alamat, status, created_by, created_at) VALUES (:idkendaraan, :no_dt, :driver, :namaPemilik, :tnkb, :tahun, :handphone, :bank, :rekening, :alamat, :status, :created_by, :created_at)');
     $stmt->execute([
         ':idkendaraan' => $body['idkendaraan'],
+        ':no_dt' => trim((string)$body['noDt']),
+        ':driver' => trim((string)$body['driver']),
         ':namaPemilik' => $body['namaPemilik'],
         ':tnkb' => $body['tnkb'],
         ':tahun' => $body['tahun'],
@@ -514,6 +518,8 @@ function updateKendaraan(int $id, Request $request): void
     $body = $request->body();
     $validator = new Validator();
     $validator->required('idkendaraan', $body['idkendaraan'] ?? null)
+              ->required('noDt', $body['noDt'] ?? null)
+              ->required('driver', $body['driver'] ?? null)
               ->required('namaPemilik', $body['namaPemilik'] ?? null)
               ->required('tnkb', $body['tnkb'] ?? null)
               ->required('tahun', $body['tahun'] ?? null)
@@ -529,9 +535,11 @@ function updateKendaraan(int $id, Request $request): void
         Response::json(['success' => false, 'errors' => $validator->getErrors()], 422);
     }
 
-    $stmt = Database::connect()->prepare('UPDATE kendaraan SET idkendaraan = :idkendaraan, namaPemilik = :namaPemilik, tnkb = :tnkb, tahun = :tahun, handphone = :handphone, bank = :bank, rekening = :rekening, alamat = :alamat, status = :status, updated_by = :updated_by, updated_at = :updated_at WHERE id = :id');
+    $stmt = Database::connect()->prepare('UPDATE kendaraan SET idkendaraan = :idkendaraan, no_dt = :no_dt, driver = :driver, namaPemilik = :namaPemilik, tnkb = :tnkb, tahun = :tahun, handphone = :handphone, bank = :bank, rekening = :rekening, alamat = :alamat, status = :status, updated_by = :updated_by, updated_at = :updated_at WHERE id = :id');
     $stmt->execute([
         ':idkendaraan' => $body['idkendaraan'],
+        ':no_dt' => trim((string)$body['noDt']),
+        ':driver' => trim((string)$body['driver']),
         ':namaPemilik' => $body['namaPemilik'],
         ':tnkb' => $body['tnkb'],
         ':tahun' => $body['tahun'],
@@ -742,7 +750,7 @@ function listTransactionOptions(): void
     $db=Database::connect();
     Response::json(['success'=>true,'data'=>[
         'kebun'=>$db->query("SELECT nama FROM kebun WHERE status='Aktif' ORDER BY nama")->fetchAll(PDO::FETCH_ASSOC),
-        'kendaraan'=>$db->query("SELECT tnkb,namaPemilik FROM kendaraan WHERE status='Aktif' ORDER BY tnkb")->fetchAll(PDO::FETCH_ASSOC),
+        'kendaraan'=>$db->query("SELECT tnkb,namaPemilik,driver FROM kendaraan WHERE status='Aktif' ORDER BY tnkb")->fetchAll(PDO::FETCH_ASSOC),
         'pks'=>$db->query("SELECT nama FROM pks WHERE status='Aktif' ORDER BY nama")->fetchAll(PDO::FETCH_ASSOC),
     ]]);
 }

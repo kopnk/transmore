@@ -7,6 +7,7 @@ type Resource = 'users'|'kendaraan'|'pks'|'kebun'|'audit-logs'
 const camelize=(row:any)=>({
   ...row,
   namaPemilik:row.namaPemilik??row.nama_pemilik,
+  noDt:row.noDt??row.no_dt,
   mustChangePassword:Boolean(row.mustChangePassword??row.must_change_password),
   createdBy:row.createdBy??row.created_by,
   createdAt:row.createdAt??row.created_at,

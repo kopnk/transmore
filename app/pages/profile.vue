@@ -13,12 +13,14 @@ onMounted(async()=>{
 
 async function save(){
   const result=z.object({name:z.string().min(3,'Nama minimal 3 karakter'),alamat:z.string().min(5,'Alamat minimal 5 karakter')}).safeParse({name:form.name,alamat:form.alamat})
-  if(!result.success)return toast.error(result.error.issues[0]?.message??'Data tidak valid')
-  if(!auth.user?.id)return
-  await useApi().request('/me',{method:'PUT',body:result.data})
-  Object.assign(auth.user,result.data)
-  await audit('UPDATE','Profile',auth.user.email)
-  toast.success('Profile berhasil diperbarui')
+  if(!result.success){notifyValidationErrors(result.error);return}
+  if(!auth.user?.id)return toast.error('Sesi pengguna tidak ditemukan. Silakan login kembali.')
+  try{
+    await useApi().request('/me',{method:'PUT',body:result.data})
+    Object.assign(auth.user,result.data)
+    await audit('UPDATE','Profile',auth.user.email)
+    toast.success('Profile berhasil diperbarui')
+  }catch(error){toast.error(error instanceof Error?error.message:'Profile gagal diperbarui')}
 }
 </script>
 
@@ -32,7 +34,7 @@ async function save(){
         <div><label class="label">Handphone</label><input v-model="form.handphone" class="input cursor-not-allowed bg-slate-50 text-slate-500" inputmode="tel" readonly></div>
         <div class="sm:col-span-2"><label class="label">Alamat</label><textarea v-model="form.alamat" class="input" rows="3"></textarea></div>
       </div>
-      <div class="mt-6 flex justify-end"><button class="btn-primary">Simpan Perubahan</button></div>
+      <div class="mt-6 flex justify-end"><button class="btn-primary">Update</button></div>
     </form>
   </div>
 </template>

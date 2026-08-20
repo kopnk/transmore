@@ -19,7 +19,7 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Sistem operasional transportasi offline-first' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' }
       ],
-      link: [{ rel: 'manifest', href: '/manifest.webmanifest' }, { rel: 'icon', href: '/icon.svg' }]
+      link: [{ rel: 'manifest', href: '/manifest.webmanifest' }, { rel: 'icon', type:'image/png', href: '/icon.png' }, { rel: 'apple-touch-icon', href: '/icon-192.png' }]
     }
   },
   typescript: { strict: true, typeCheck: true }

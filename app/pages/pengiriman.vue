@@ -10,7 +10,7 @@ const{sync,enqueue}=useTransactionSync();
 const kebuns=ref<Pick<Kebun,'nama'>[]>([]);
 const pksList=ref<Pick<Pks,'nama'>[]>([]);
 const rows=ref<Transaction[]>([]);
-const vehicles=ref<Pick<Kendaraan,'tnkb'|'namaPemilik'>[]>([]);
+const vehicles=ref<Pick<Kendaraan,'tnkb'|'namaPemilik'|'driver'>[]>([]);
 const show=ref(false);
 const editing=ref<number|undefined>();
 const saving=ref(false);
@@ -84,7 +84,7 @@ async function load(){
   rows.value=await db.transactions.reverse().toArray();
   if(navigator.onLine)try{await sync();rows.value=await db.transactions.reverse().toArray()}catch{toast.error('Backend belum terhubung; data transaksi lokal tetap aman')}
   if(navigator.onLine)try{
-    const response=await useApi().request<{kendaraan:Pick<Kendaraan,'tnkb'|'namaPemilik'>[];kebun:Pick<Kebun,'nama'>[];pks:Pick<Pks,'nama'>[]}>('/transaction-options');
+    const response=await useApi().request<{kendaraan:Pick<Kendaraan,'tnkb'|'namaPemilik'|'driver'>[];kebun:Pick<Kebun,'nama'>[];pks:Pick<Pks,'nama'>[]}>('/transaction-options');
     vehicles.value=response.data?.kendaraan||[];kebuns.value=response.data?.kebun||[];pksList.value=response.data?.pks||[];
   }catch{toast.error('Master data belum dapat dimuat dari backend')}
 }
@@ -92,6 +92,11 @@ function resetForm(){
   Object.assign(form,newForm(),{driver:auth.user?.name||''});
 }
 function resetFilters(){Object.assign(filters,{startDate:dayjs().startOf('month').format('YYYY-MM-DD'),endDate:dayjs().format('YYYY-MM-DD'),owner:'',tnkb:'',kebun:'',divisi:'',pks:'',driver:'',receiverPic:''})}
+function fillDriverFromVehicle(){
+  const vehicle=vehicles.value.find(item=>item.tnkb===form.vehicle);
+  form.driver=vehicle?.driver?.trim()||'';
+  if(!form.driver)toast.warning('Driver kendaraan belum diisi di master Kendaraan');
+}
 function openNew(){
   editing.value=undefined;
   resetForm();
@@ -316,8 +321,8 @@ watch(()=>route.query.new,(value,previous)=>{if(value&&value!==previous)openNew(
         </tbody>
       </table>
     </div>
-        <div v-if="show" class="fixed inset-0 z-50 overflow-auto bg-black/50 p-4">
-          <form class="card w-full max-w-4xl p-6 mx-auto my-8 flex flex-col max-h-[calc(100vh-120px)]" @submit.prevent="save">
+        <div v-if="show" class="fixed inset-0 z-[70] overflow-auto bg-black/50 p-4 lg:pl-64">
+          <form class="card mx-auto my-8 flex max-h-[calc(100vh-120px)] w-full max-w-4xl flex-col p-6" @submit.prevent="save">
         <h3 class="mb-5 text-xl font-bold">{{editing!==undefined?'Update':'Tambah'}} Pengiriman</h3>
         <div class="grid gap-4 sm:grid-cols-2 flex-1 overflow-auto pr-2">
           <!-- ID hidden from form as requested -->
@@ -342,14 +347,14 @@ watch(()=>route.query.new,(value,previous)=>{if(value&&value!==previous)openNew(
           </div>
           <div>
             <label class="label">Kendaraan *</label>
-            <select v-model="form.vehicle" class="input" required>
+            <select v-model="form.vehicle" class="input" required @change="fillDriverFromVehicle">
               <option value="" disabled>Pilih Kendaraan</option>
               <option v-for="tnkb in vehicleOptions" :key="tnkb" :value="tnkb">{{tnkb}}</option>
             </select>
           </div>
           <div>
             <label class="label">Driver *</label>
-            <input v-model="form.driver" class="input disabled:bg-slate-100 disabled:text-slate-500" placeholder="Driver" :disabled="!canChangeDriver" required>
+            <input v-model="form.driver" class="input disabled:bg-slate-100 disabled:text-slate-500" placeholder="Otomatis dari master Kendaraan" :disabled="!canChangeDriver" required>
           </div>
           <div>
             <label class="label">Odo Awal *</label>

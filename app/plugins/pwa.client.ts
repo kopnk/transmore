@@ -5,5 +5,5 @@ export default defineNuxtPlugin(()=>{
     caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('transmore-')).map(key=>caches.delete(key))))
     return
   }
-  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js'))
+  navigator.serviceWorker.register('/sw.js')
 })

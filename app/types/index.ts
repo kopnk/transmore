@@ -4,7 +4,7 @@ export type CrudPermission = Record<CrudAction, boolean>
 export type Permission = Record<PageKey, CrudPermission>
 export type UserRole = 'admin'|'driver'|'superadmin'
 export interface User { id?:number; iduser:string; email:string; name:string; handphone:string; alamat:string; role:UserRole; status:'Aktif'|'Nonaktif'; permissions:Permission; mustChangePassword?:boolean; createdBy:string; createdAt:string; updatedBy?:string; updatedAt?:string }
-export interface Kendaraan { id?:number; idkendaraan:string; namaPemilik:string; tnkb:string; tahun:number; handphone:string; bank:string; rekening:string; alamat:string; status:'Aktif'|'Nonaktif'; createdBy:string; createdAt:string; updatedBy?:string; updatedAt?:string }
+export interface Kendaraan { id?:number; idkendaraan:string; noDt:string; driver:string; namaPemilik:string; tnkb:string; tahun:number; handphone:string; bank:string; rekening:string; alamat:string; status:'Aktif'|'Nonaktif'; createdBy:string; createdAt:string; updatedBy?:string; updatedAt?:string }
 export interface Pks { id?:number; idpks:string; nama:string; pic:string; handphone:string; alamat:string; status?:'Aktif'|'Nonaktif'; createdBy:string; createdAt:string; updatedBy?:string; updatedAt?:string }
 export interface Kebun { id?:number; idkebun:string; nama:string; pic:string; handphone:string; alamat:string; status:'Aktif'|'Nonaktif'; createdBy:string; createdAt:string; updatedBy?:string; updatedAt?:string }
 export interface Transaction {

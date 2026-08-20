@@ -25,7 +25,15 @@ export const useApi = () => {
     } catch (error: any) {
       const body = error?.data as ApiResponse | undefined
       const validation = body?.errors ? Object.values(body.errors)[0] : undefined
-      throw new ApiError(validation || body?.message || 'Tidak dapat terhubung ke server', error?.status || 0, body?.errors)
+      const status = Number(error?.status || error?.statusCode || 0)
+      const fallback = status === 401 ? 'Sesi Anda telah berakhir. Silakan masuk kembali.'
+        : status === 403 ? 'Anda tidak memiliki izin untuk melakukan tindakan ini.'
+          : status === 404 ? 'Data atau layanan yang diminta tidak ditemukan.'
+            : status === 409 ? 'Data yang sama sudah digunakan.'
+              : status === 429 ? 'Terlalu banyak permintaan. Silakan tunggu dan coba lagi.'
+                : status >= 500 ? 'Server mengalami masalah. Silakan coba lagi.'
+                  : 'Tidak dapat terhubung ke server.'
+      throw new ApiError(validation || body?.message || fallback, status, body?.errors)
     }
   }
   return { request }
